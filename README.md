@@ -128,7 +128,76 @@ int main(void)
     }
 }
 ```
+
 *Why do we initialize count1 outside of main?* 
 - This makes count1 a **static** variable which comes with many desirable traits 
     - Static variables are assigned a permanent place in RAM
     - These variables are always visible to the debugger
+
+
+# Techniques 
+
+## Debugging Tools 
+
+### Built-In Debugger
+
+Allows developer to start and stop code execution
+
+- When stopped, we can *read* values of the local and global variables
+- When stopped, you can *alter* the values of local and global variables
+
+**NOTE:** Does not allow for inspection/alterations while the code is executing
+
+#### Stopping and Analyzing is not always feasible 
+
+- Motion control systems cannot be stopped, otherwise the machine will run away
+
+### Oscilloscope 
+
+We tackle real-time inspection of embedded systems using an Oscilloscope
+
+1. Typically done by writing a `0` or `1` to an output pin
+2. Connecting that pin to an oscilloscope 
+3. Compare that to when other inputs change giving vital timing readings to further debug
+
+Or
+
+1. Write a pulse to an output pin
+    - The width of the pulse indicates where you are in the code
+```c
+Test_Point_P3_2_Write(1); // Timing marker
+CyDelayUs(1); // 1 Microsecond delay
+Test_Point_P3_2_Write(0);
+```
+
+Another cool technique is using a *Digital-to-Analog Converter* on the chip for 
+debugging purposes
+
+1. Set up a DAC to output to any available pin
+2. Feed in the data you want to inspect in real time into the DAC
+    > DAC input *must* be a 8bit unsigned number (like char or uint8)
+3. If data you want to read is something like a uint32 or int16
+    - Normalize the data point before feeding it into the DAC
+```c
+// Example 
+int32 noise_level; // This is the value we want to read on our oscope
+/* If we know that we do not expect values to be as large as 2^31 
+and we know that the largest value,
+when divided by 16 is <= 255
+we can downsample, cast to uint8 for the DAC, and feed it in
+*/
+DAC_SetValue( (uint8) ( noise_level/ 16 ) );
+// Every time the above line is hit, it will be read on the oscilloscope
+```
+4. Connect that pin to your oscilloscope to read the outputs in ***real-time***
+
+*Why not just use an LCD?*
+- There may be some data we want to measure in real-time, and 
+    perhaps an LCD will not be adequate at updating as fast as we require
+
+### LCD Display
+
+Works best for slow changing variables, or displaying text messages
+> Usually pretty hard for a regular person to read an LCD display at a rate faster than 2x/sec
+
+### Digital Logic Analyzer
