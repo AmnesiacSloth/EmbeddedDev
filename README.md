@@ -24,6 +24,40 @@ The chip is not a *fixed design* meaning you get to wire the analog and digital 
 - Digital, timers and counters etc.
 > The ***CY8C5888LTI-LP097*** is like an FPGA but with analog circuitry support too 
 
+### Actually Flashing the Damn Thing 
+
+> The inspiration behind this section is because my bonehead could not grasp why my pc 
+wasn't detecting the dev kit on plugging in the board using a micro-usb cable.
+
+The Cypress CY8CKIT-059 PSoC MCU comes with *TWO* usb connectors. 
+1. The KitProg USB Programmer/Debugger
+2. The Target Board USB (PSoC 5LP's Native USB)
+
+![PSoC 5LP Block Diagram](assets/PSoC_Block_Diagram.png)
+> USB on the left of the diagram and another USB on the right.
+#### KitProg
+
+Onboard programmer/debugger, enables programming and debugging the *target* PSoC 5LP device.
+- Can act as a USB-UART & UART-I2C bridge as well
+    - Leverages these protocols to communicate with the PSoC project via your computer
+- Can be snapped off an used to program other devices that implement the same interface
+
+This is the connector that gets plugged into your computer to detect it and flash your code! 
+
+#### Micro-USB Connector 
+
+Provides access to the USB block of the PSoC 5LP Device. This connector allows for development
+of USB applications
+
+- Directly connected to the PSoC 5LP's internal USB Block, meaning you can do cool things like 
+program the PSoC to asct as a USB HID mouse, Keyboard, or other custom USB device!
+- When you connect this usb port, your computer likely will just detect a generic device. It is 
+up to the developer to program the board with firmware that implements a specific USB device class
+    - CDC (serial) device
+    - HID Device
+    - etc etc.
+
+
 ### PSoC Creator, Development Software
 [Software Download Page](https://www.infineon.com/cms/en/design-support/tools/sdk/psoc-software/psoc-creator/) - 
 Software can be used without creating an account :)
@@ -84,13 +118,13 @@ Other routines are provided "as needed", depending on your schematic contents
 
 `ReadCounter()`: Wonder what this does?? 
 
-`WritePeriod(uint8)`: Period refers to the max value/start value when the counter begins,
-    - This overwrites the default preconfigured values set in the schematic component
+`WritePeriod(uint8)`: Period refers to the max value/start value when the counter begins
+- This overwrites the default preconfigured values set in the schematic component
 
 
 ##### Notable Counter Info
 
-- Counter is default configured to count **down**
+- Counter is default configured to count ***down***
 
 *There are two types of counters*
 - **Fixed Function** counters can only count down
