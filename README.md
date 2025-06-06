@@ -58,6 +58,11 @@ up to the developer to program the board with firmware that implements a specifi
     - etc etc.
 
 
+### Building Circuits
+
+- The Kitprog, when connected can supply 5V to itself, and the target board, i.e the PSoc MCU
+- The Target Board USB (micro-usb) can supply 5V to itself, but does not supply the Kitprog at all
+
 ### PSoC Creator, Development Software
 [Software Download Page](https://www.infineon.com/cms/en/design-support/tools/sdk/psoc-software/psoc-creator/) - 
 Software can be used without creating an account :)
