@@ -52,17 +52,51 @@ on our MPU/MCU & for simplicity
 - R/W (pin 5) can be controlled, or wired to GND (logic 0) 
     - We only really need to write (R/W 0) to the lcd, not read (R/W 1)
 - RS?
+- E?
 
-## Custom Firmware
+### Custom Firmware
 
-IDK if the Psoc Creator LCD Component in the components catalog is compatible with 
-my display, and I might as well learn, so I will be writing my own drivers, firmware
+IDK if the Psoc Creator LCD Component in the Components Catalog is compatible with 
+my display and I might as well learn, so I will be writing my own drivers, firmware
 whatever you want to call it, for the LCD
 
 ### Initalize the Display 
 
+**Must send 3 wake ups before switching to 4-bit mode commands**
+This is because generally LCD's with only 4 wired MPU lines requires us to ensure that we can communicate
+to the LCD that we want to operate in 4-bit mode even though it default's to starting in 8-bit mode.
 
-- RW -> `0`
-- TS- 
+Function set `0x30 | 0011 0000`
 
+`001D` is db7-db4, bottom 2 bits are the most important\
+`xx1x`, DB5 must be set to `1`\
+`xxxD`, DB4 holds the *Interface data length control bit*, `1` means 8-bit bus mode, `0` means 4-bit mode\
+- Essentially this is the signal to select the mode for the display  
+
+`NFxx` is DB3-DB0, top 2 bits are the most important\
+`Nxxx`, DB3 holds the *Display line number control bit*, `1` means 2-line display mode, `0` means 1-line display mode\
+`Nxxx`, DB2 holds the *Display font type control bit*, `1` means 5x11 dots format, `0` means 5x8 dots format 
+
+``` c
+void init()
+{
+P1 = 0;
+P3 = 0;
+Delay(100); //Wait >40 msec after power is applied
+P1 = 0x30; //put 0x30 on the output port
+Delay(30); //must wait 5ms, busy flag not available
+Nybble(); //command 0x30 = Wake up
+Delay(10); //must wait 160us, busy flag not available
+Nybble(); //command 0x30 = Wake up #2
+Delay(10); //must wait 160us, busy flag not available
+Nybble(); //command 0x30 = Wake up #3
+Delay(10); //can check busy flag now instead of delay
+P1= 0x20; //put 0x20 on the output port
+Nybble(); //Function set: 4-bit interface
+command(0x28); //Function set: 4-bit/2-line
+command(0x10); //Set cursor
+command(0x0F); //Display ON; Blinking cursor
+command(0x06); //Entry Mode set
+}
+```
 
